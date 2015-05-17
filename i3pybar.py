@@ -52,7 +52,7 @@ class I3Bar(Thread):
         }
         try:
             path = os.path.dirname(os.path.realpath(__file__))
-            config.read(os.path.join(path, 'config.ini'))
+            config.read(os.path.join(path, 'settings.conf'))
         except:
             pass
 
