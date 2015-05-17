@@ -1,11 +1,13 @@
-#!/usr/bin/python
 import configparser
 import importlib
+import inspect
 import sys
 import time
 
 from datetime import datetime
 from threading import Thread, Event
+
+from plugins.base import ModBase
 
 
 class I3Bar(Thread):
@@ -18,11 +20,30 @@ class I3Bar(Thread):
         print('{"version":1}')
         print('[')
         print('[],')
-        #self.load_config()
+        self.load_config()
+        self.load_plugins()
         super(I3Bar, self).__init__()
 
+    def load_plugins(self):
+        mods = {}
+        for mod in [mod for mod in self.config.sections() if mod != 'general']:
+            try:
+                plugin = importlib.import_module('plugins.%s' % mod)
+                mod_list = dir(plugin)
+                for method in mod_list:
+                    cls = getattr(plugin, method)
+                    if inspect.isclass(cls):
+                        if issubclass(cls, ModBase):
+                            mods[mod] = {
+                                'instance': cls(config[mod]),
+                                'config': config[mod],
+                            }
+            except Exception as e:
+                print("Could not load module")
+        self.mods = mods
+
     def load_config(self):
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(interpolation=None)
         config['clock'] = { 
             'format': '%a %d %b %H:%M:%S',
             'rate': '1'
@@ -31,9 +52,6 @@ class I3Bar(Thread):
             config.read('config.ini')
         except:
             pass
-
-        for mod in config.sections():
-            mods.append(importlib.import_module('modules.clock'))
 
         self.config = config
 
@@ -71,4 +89,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         bar.stop()
         exit(0)
-
