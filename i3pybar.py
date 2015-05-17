@@ -44,17 +44,16 @@ class I3Bar(Thread):
 
     def load_config(self):
         config = configparser.ConfigParser(interpolation=None)
-        config['general'] = { 
-            'interval': '1',
-        }
-        config['clock'] = { 
-            'format': '%a %d %b %H:%M:%S',
-        }
         try:
             path = os.path.dirname(os.path.realpath(__file__))
             config.read(os.path.join(path, 'settings.conf'))
-        except:
-            pass
+        except Exception as e:
+            config['general'] = { 
+                'interval': '1',
+            }
+            config['clock'] = { 
+                'format': '%a %d %b %H:%M:%S',
+            }
 
         self.config = config
         self.interval = float(config['general']['interval'])
@@ -75,6 +74,7 @@ class I3Bar(Thread):
             out = []
             for mod in self.mods:
                 out.append(mod.output())
+                #print([key for key in mod.config.items()])
             print("%s," % json.dumps(out))
             sys.stdout.flush()
             time.sleep(self.interval)

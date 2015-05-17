@@ -4,7 +4,7 @@ class PluginBase(object):
         self.config = config
         self._display = {
             'full_text': '',
-            'color': config.get('color', '#FFFFFF')
+            'color': '#%s' % config.get('color', 'FFFFFF')
         }
 
     def set_text(self, s):
