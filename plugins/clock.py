@@ -1,10 +1,10 @@
-def load(config):
-    return ClockModule(config)
+from datetime import datetime
 
-class ClockModule():
+from .base import PluginBase
 
-    def __init__(self, config):
-        self.config = config
 
-    def update(self):
-        pass
+class ClockModule(PluginBase):
+
+    def run(self):
+        timestr = datetime.now().strftime(self.config['format'])
+        self.set_text(timestr)

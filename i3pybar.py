@@ -1,13 +1,15 @@
 import configparser
 import importlib
 import inspect
+import json
+import os
 import sys
 import time
 
 from datetime import datetime
 from threading import Thread, Event
 
-from plugins.base import ModBase
+from plugins.base import PluginBase
 
 
 class I3Bar(Thread):
@@ -16,41 +18,46 @@ class I3Bar(Thread):
     _stop = Event()
 
     def __init__(self):
-        self.text = '[{ "full_text" : "XXX " , "color" : "#FFFFFF" }],'
         self.load_config()
         self.load_plugins()
         super(I3Bar, self).__init__()
 
+    def handle_err(self, err):
+        print(err)
+
     def load_plugins(self):
-        mods = {}
+        mods = []
         for mod in [mod for mod in self.config.sections() if mod != 'general']:
             try:
                 plugin = importlib.import_module('plugins.%s' % mod)
                 mod_list = dir(plugin)
                 for method in mod_list:
                     cls = getattr(plugin, method)
-                    if inspect.isclass(cls):
-                        if issubclass(cls, ModBase):
-                            mods[mod] = {
-                                'instance': cls(config[mod]),
-                                'config': config[mod],
-                            }
+                    if inspect.isclass(cls) and cls != PluginBase:
+                        if issubclass(cls, PluginBase):
+                            mods.append(cls(self.config[mod]))
             except Exception as e:
-                print("Could not load module")
+                print(e)
+                self.handle_err("Could not load module %s" % mod)
+
         self.mods = mods
 
     def load_config(self):
         config = configparser.ConfigParser(interpolation=None)
+        config['general'] = { 
+            'interval': '1',
+        }
         config['clock'] = { 
             'format': '%a %d %b %H:%M:%S',
-            'rate': '1'
         }
         try:
-            config.read('config.ini')
+            path = os.path.dirname(os.path.realpath(__file__))
+            config.read(os.path.join(path, 'config.ini'))
         except:
             pass
 
         self.config = config
+        self.interval = float(config['general']['interval'])
 
     def stop(self):
         self._stop.set()
@@ -65,13 +72,12 @@ class I3Bar(Thread):
         print('[],')
 
         while not self.stopped():
-            text = self.text.replace(
-                "XXX",
-                datetime.now().strftime("%a %d %b %H:%M:%S")
-            )
-            print(text)
+            out = []
+            for mod in self.mods:
+                out.append(mod.output())
+            print("%s," % json.dumps(out))
             sys.stdout.flush()
-            time.sleep(1)
+            time.sleep(self.interval)
         exit(0)
 
 
