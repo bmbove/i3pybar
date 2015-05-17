@@ -17,9 +17,6 @@ class I3Bar(Thread):
 
     def __init__(self):
         self.text = '[{ "full_text" : "XXX " , "color" : "#FFFFFF" }],'
-        print('{"version":1}')
-        print('[')
-        print('[],')
         self.load_config()
         self.load_plugins()
         super(I3Bar, self).__init__()
@@ -62,6 +59,10 @@ class I3Bar(Thread):
         return self._stop.isSet()
 
     def run(self):
+
+        print('{"version":1}')
+        print('[')
+        print('[],')
 
         while not self.stopped():
             text = self.text.replace(
