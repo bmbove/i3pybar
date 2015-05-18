@@ -21,13 +21,19 @@ class MemoryPlugin(PluginBase):
             if len(data) > 0:
                 mem_dict[data[0].replace(":", "")] = int(data[1])
 
+        free_mem = mem_dict['MemFree']
+        free_mem += mem_dict['Buffers'] 
+        free_mem += mem_dict['Cached']
+
+        used_mem = mem_dict['MemTotal'] - free_mem
+
         mem_info = {
-            'used': '%.2f' % ((mem_dict['Active'])/div),
+            'used': '%.2f' % (used_mem/div),
             'total': '%.2f' % (mem_dict['MemTotal']/div),
-            'free': '%.2f' % (mem_dict['MemFree']/div),
+            'free': '%.2f' % (free_mem/div),
         }
 
-        percent_used = int((mem_dict['Active']/mem_dict['MemTotal']) * 100)
+        percent_used = int((used_mem/mem_dict['MemTotal']) * 100)
         mem_info['percent'] = percent_used
         return mem_info
 
