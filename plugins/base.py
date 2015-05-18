@@ -9,7 +9,7 @@ class PluginBase(Thread):
     def __init__(self, out_q, config):
 
         self.out_q = out_q
-        self.config = self.configure(config)
+        self.default_config = self.configure()
         self.config['cache_time'] = float(self.config.get('cache_time', 1.0))
 
         self._display = {
@@ -19,8 +19,11 @@ class PluginBase(Thread):
 
         super(PluginBase, self).__init__()
 
-    def configure(self, config):
-        return config
+    def configure(self):
+        return {} 
+
+    def parse_config(self, defaults):
+        pass
 
     def set_text(self, s):
         self._display['full_text'] = s
