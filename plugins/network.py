@@ -66,19 +66,23 @@ class NetworkPlugin(PluginBase):
             if len(l_arr) > 0:
                 ifaces[l_arr[0].replace(":", "")] = {
                     'status': l_arr[1],
-                    'link': l_arr[2],
-                    'level': l_arr[3],
-                    'noise': l_arr[4],
+                    'link': l_arr[2].replace(".", "%"),
+                    'level': l_arr[3].replace(".", "dB"),
+                    'noise': l_arr[4] + "dB",
                 }
         self.ifaces = ifaces
 
     def update(self):
         self.general_info()
+
         if 'interface' not in self.config:
             for key in self.ifaces.keys():
                 self.config['interface'] = key
                 break
+
         iface = self.config['interface']
         ip = self.get_ip(iface)
         essid = self.get_essid(iface)
+        locals().update(self.ifaces[iface])
+
         self.set_text(self.config['format'] % locals())
