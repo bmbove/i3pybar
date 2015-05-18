@@ -58,7 +58,7 @@ class NetworkPlugin(PluginBase):
             return name
         return "-"
 
-    def general_info(self):
+    def wifi_info(self):
         ifaces = {}
         info = self.read_file('/proc/net/wireless', start=2)
         for line in info.split("\n"):
@@ -70,23 +70,32 @@ class NetworkPlugin(PluginBase):
                     'level': l_arr[3].replace(".", "dB"),
                     'noise': l_arr[4] + "dB",
                 }
-        self.ifaces = ifaces
+        self.wifi = ifaces
 
     def update(self):
-        self.general_info()
+        self.info = {
+            'ip': '',
+            'essid': '',
+            'status': '',
+            'link': '',
+            'level': '',
+            'noise': '',
+        }
+
+        self.wifi_info()
 
         if 'interface' not in self.config:
-            for key in self.ifaces.keys():
+            for key in self.wifi.keys():
                 self.config['interface'] = key
                 break
-        else:
-            iface = self.config['interface']
+            
+        iface = self.config['interface']
 
-        if iface not in self.ifaces:
-            self.set_text('disconnected')
-        else:
-            ip = self.get_ip(iface)
-            essid = self.get_essid(iface)
-            locals().update(self.ifaces[iface])
+        if iface in self.wifi:
+            for key, value in self.wifi[iface].items():
+                self.info[key] = value
+            info['essid'] = self.get_essid(iface)
 
-            self.set_text(self.config['format'] % locals())
+        self.info['ip'] = self.get_ip(iface)
+        locals().update(self.info)
+        self.set_text(self.config['format'] % locals())
