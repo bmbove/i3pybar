@@ -94,7 +94,7 @@ class NetworkPlugin(PluginBase):
         if iface in self.wifi:
             for key, value in self.wifi[iface].items():
                 self.info[key] = value
-            info['essid'] = self.get_essid(iface)
+            self.info['essid'] = self.get_essid(iface)
 
         self.info['ip'] = self.get_ip(iface)
         locals().update(self.info)
