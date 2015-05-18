@@ -5,6 +5,6 @@ from .base import PluginBase
 
 class ClockModule(PluginBase):
 
-    def run(self):
+    def update(self):
         timestr = datetime.now().strftime(self.config['format'])
         self.set_text(timestr)

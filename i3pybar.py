@@ -8,6 +8,7 @@ import time
 
 from datetime import datetime
 from threading import Thread, Event
+from queue import Queue
 
 from plugins.base import PluginBase
 
@@ -18,6 +19,7 @@ class I3Bar(Thread):
     _stop = Event()
 
     def __init__(self):
+        self.out_q = Queue()
         self.load_config()
         self.load_plugins()
         super(I3Bar, self).__init__()
@@ -27,6 +29,7 @@ class I3Bar(Thread):
 
     def load_plugins(self):
         mods = []
+        slot = 0
         for mod in [mod for mod in self.config if mod['name'] != 'general']:
             try:
                 plugin = importlib.import_module('plugins.%s' % mod['name'])
@@ -35,7 +38,9 @@ class I3Bar(Thread):
                     cls = getattr(plugin, method)
                     if inspect.isclass(cls) and cls != PluginBase:
                         if issubclass(cls, PluginBase):
-                            mods.append(cls(mod['settings']))
+                            mod['settings']['slot'] = slot
+                            mods.append(cls(self.out_q, mod['settings']))
+                            slot += 1
             except Exception as e:
                 print(e)
                 self.handle_err("Could not load module %s" % mod['name'])
@@ -90,13 +95,19 @@ class I3Bar(Thread):
         print('[')
         print('[],')
 
+        for mod in self.mods:
+            mod.start()
+
+        out = []
+        for i in self.mods:
+            out.append({'full_text':'', 'color':'#FFFFFF'})
+
         while not self.stopped():
-            out = []
-            for mod in self.mods:
-                out.append(mod.output())
+            new_msg = self.out_q.get()
+            self.out_q.task_done()
+            out[new_msg[0]] = new_msg[1]
             print("%s," % json.dumps(out))
             sys.stdout.flush()
-            time.sleep(self.interval)
         exit(0)
 
 
