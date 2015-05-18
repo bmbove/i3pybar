@@ -83,7 +83,7 @@ class NetworkPlugin(PluginBase):
             iface = self.config['interface']
 
         if iface not in self.ifaces:
-            self.set_text('wlan not found')
+            self.set_text('disconnected')
         else:
             ip = self.get_ip(iface)
             essid = self.get_essid(iface)
