@@ -1,8 +1,8 @@
-import configparser
 import importlib
 import inspect
 import json
 import os
+import re
 import sys
 import time
 
@@ -27,36 +27,56 @@ class I3Bar(Thread):
 
     def load_plugins(self):
         mods = []
-        for mod in [mod for mod in self.config.sections() if mod != 'general']:
+        for mod in [mod for mod in self.config if mod['name'] != 'general']:
             try:
-                plugin = importlib.import_module('plugins.%s' % mod)
+                plugin = importlib.import_module('plugins.%s' % mod['name'])
                 mod_list = dir(plugin)
                 for method in mod_list:
                     cls = getattr(plugin, method)
                     if inspect.isclass(cls) and cls != PluginBase:
                         if issubclass(cls, PluginBase):
-                            mods.append(cls(self.config[mod]))
+                            mods.append(cls(mod['settings']))
             except Exception as e:
                 print(e)
-                self.handle_err("Could not load module %s" % mod)
+                self.handle_err("Could not load module %s" % mod['name'])
 
         self.mods = mods
 
     def load_config(self):
-        config = configparser.ConfigParser(interpolation=None)
+        config = []
+        section_re = re.compile('^\[(?P<plugin>[-\w]+)\]$')
+        option_re = re.compile('^(?P<option>[\w-]+)[\s+]?=[\s+]?(?P<value>.*)')
+        plugin_name = ''
         try:
             path = os.path.dirname(os.path.realpath(__file__))
-            config.read(os.path.join(path, 'settings.conf'))
+            with open(os.path.join(path, 'settings.conf'), 'r') as fh:
+                lines = [line.strip() for line in fh]
+            for line in lines:
+                sec_m = section_re.match(line)
+                opt_m = option_re.match(line)
+                if sec_m:
+                    plugin_name = sec_m.group('plugin')
+                    config.append({'name': plugin_name, 'settings':{}})
+                if opt_m:
+                    option = opt_m.group('option')
+                    value = opt_m.group('value')
+                    config[len(config)-1]['settings'][option] = value
         except Exception as e:
-            config['general'] = { 
-                'interval': '1',
-            }
-            config['clock'] = { 
-                'format': '%a %d %b %H:%M:%S',
-            }
+            config.append({ 
+                'name': 'general',
+                'settings': {'interval': '1'}
+            })
+            config.append({ 
+                'name': 'clock',
+                'settings': {'format': '%a %d %b %H:%M:%S'},
+            })
+
+        for i, dic in enumerate(config):
+            if dic['name'] == 'general':
+                config.insert(0, config.pop(i))
 
         self.config = config
-        self.interval = float(config['general']['interval'])
+        self.interval = float(config[0]['settings']['interval'])
 
     def stop(self):
         self._stop.set()
@@ -74,7 +94,6 @@ class I3Bar(Thread):
             out = []
             for mod in self.mods:
                 out.append(mod.output())
-                #print([key for key in mod.config.items()])
             print("%s," % json.dumps(out))
             sys.stdout.flush()
             time.sleep(self.interval)
