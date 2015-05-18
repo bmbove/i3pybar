@@ -79,10 +79,14 @@ class NetworkPlugin(PluginBase):
             for key in self.ifaces.keys():
                 self.config['interface'] = key
                 break
+        else:
+            iface = self.config['interface']
 
-        iface = self.config['interface']
-        ip = self.get_ip(iface)
-        essid = self.get_essid(iface)
-        locals().update(self.ifaces[iface])
+        if iface not in self.ifaces:
+            self.set_text('wlan not found')
+        else:
+            ip = self.get_ip(iface)
+            essid = self.get_essid(iface)
+            locals().update(self.ifaces[iface])
 
-        self.set_text(self.config['format'] % locals())
+            self.set_text(self.config['format'] % locals())
