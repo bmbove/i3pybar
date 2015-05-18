@@ -1,6 +1,9 @@
 """
 get_ip source:
 http://stackoverflow.com/a/9267833
+
+get_essid modified from:
+http://stackoverflow.com/a/14142016
 """
 import array
 import fcntl
@@ -41,7 +44,6 @@ class NetworkPlugin(PluginBase):
             "interface": 16,
             "essid": 32
         }
-        """Return the ESSID for an interface, or None if we aren't connected."""
         interface = interface.ljust(maxLength["interface"], "\0").encode('utf-8')
         essid = array.array("B", "\0".encode('utf-8') * maxLength["essid"])
         essidPointer, essidLength = essid.buffer_info()
