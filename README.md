@@ -2,7 +2,7 @@ i3pybar
 -------
 
 Not being particularly happy with the existing python options for an i3 status
-bar, this is an attempt at writing my own to fit some basic needs.
+bar, I'm attempting to write my own to fit some basic needs.
 
 **Current Goals:**
 
