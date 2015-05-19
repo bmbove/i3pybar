@@ -14,7 +14,7 @@ class CPUPlugin(PluginBase):
         self.last_usage = []
         self.last_time = 0
         self.source = '/sys/fs/cgroup/cpu/cpuacct.usage_percpu'
-        if not os.path.isfile(self.source) or bool(defaults.use_proc):
+        if not os.path.isfile(self.source) or bool(defaults['use_proc']):
             self.source = '/proc/stat'
         return defaults
 
