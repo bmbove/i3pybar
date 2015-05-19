@@ -32,6 +32,8 @@ class WeatherPlugin(PluginBase):
             q = urlopen(url)
         except HTTPError as e:
             return 'error: {}'.format(e.code)
+        except:
+            return 'error: {}'.format('connection')
 
         weather = ''
         re_str = ">Currently: (?P<conditions>[\s\w]+?): (?P<temp>[\w]+?)<"
@@ -43,5 +45,9 @@ class WeatherPlugin(PluginBase):
         return weather
  
     def update(self):
-        locals().update(self.get_weather())
-        self.set_text(self.config['format'] % locals())
+        weather = self.get_weather()
+        if type(weather) == dict:
+            locals().update(weather)
+            self.set_text(self.config['format'] % locals())
+        else:
+            self.set_text(weather)
