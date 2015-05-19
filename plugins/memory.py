@@ -3,13 +3,12 @@ from .base import PluginBase
 
 class MemoryPlugin(PluginBase):
 
-    def configure(self, config):
-        if 'divisor' not in config:
-            config['divisor'] = 1024.0**2
-        if 'format' not in config:
-            config['format'] = "{used}/{total} {percent}%%"
-        config['format'] = self.fix_format(config['format'])
-        return config
+    def configure(self):
+        defaults = {
+            'divisor': str(1024**2),
+            'format': '{used}/{total} {percent}%%'
+        }
+        return defaults
 
     def get_meminfo(self):
 

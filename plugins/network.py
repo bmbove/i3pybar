@@ -21,13 +21,13 @@ calls = {
 
 class NetworkPlugin(PluginBase):
 
-    def configure(self, config):
-        if not config.get('cache_time', False):
-            config['cache_time'] = 2.0
-        if not config.get('format', False):
-            config['format'] = '{essid} {ip}'
-        config['format'] = self.fix_format(config['format'])
-        return config
+    def configure(self):
+        defaults = {
+            'interface': 'eth0',
+            'cache_time': '2',
+            'format': '{essid} {ip}'
+        }
+        return defaults 
 
     def get_ip(self, iface):
         iface = iface.encode('utf-8')
