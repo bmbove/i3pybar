@@ -38,7 +38,7 @@ class WeatherPlugin(PluginBase):
             return 'error: {}'.format(e.code)
 
         weather = ''
-        re_str = ">Currently: (?P<conditions>[\w]+?): (?P<temp>[\w]+?)<"
+        re_str = ">Currently: (?P<conditions>[\s\w]+?): (?P<temp>[\w]+?)<"
         m = re.search(re_str, q.read().decode('ascii'))
         weather = {}
         weather['conditions'] = m.group('conditions')
