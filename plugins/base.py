@@ -1,5 +1,8 @@
 import re
 import time
+
+from urllib.request import urlopen, HTTPError, URLError
+
 from threading import Thread
 
 class PluginBase(Thread):
@@ -65,6 +68,21 @@ class PluginBase(Thread):
             for line in fh:
                 data += line
         return data
+
+    def grab_page(self, url):
+        err = False 
+        html = b''
+        try: 
+            response = urlopen(url)
+            html = response.read()
+        except HTTPError as e:
+            err = e.code
+        except URLError as e:
+            err = 'url error'
+        except:
+            err = 'connection'
+
+        return err, html.decode('ascii')
 
     def run(self):
         while True:

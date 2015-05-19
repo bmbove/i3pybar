@@ -3,9 +3,6 @@
 """
 import re
 
-from urllib.request import urlopen
-from urllib.request import HTTPError
- 
 from .base import PluginBase
  
 class WeatherPlugin(PluginBase):
@@ -28,21 +25,17 @@ class WeatherPlugin(PluginBase):
             location=self.config['location']
         )
 
-        try:
-            q = urlopen(url)
-        except HTTPError as e:
-            return 'error: {}'.format(e.code)
-        except:
-            return 'error: {}'.format('connection')
-
-        weather = ''
-        re_str = ">Currently: (?P<conditions>[\s\w]+?): (?P<temp>[\w]+?)<"
-        m = re.search(re_str, q.read().decode('ascii'))
-        weather = {}
-        weather['conditions'] = m.group('conditions')
-        weather['temp'] = m.group('temp')
- 
-        return weather
+        err, html = self.grab_page(url)
+        if not err:
+            weather = ''
+            re_str = ">Currently: (?P<conditions>[\s\w]+?): (?P<temp>[\w]+?)<"
+            m = re.search(re_str, html)
+            weather = {}
+            weather['conditions'] = m.group('conditions')
+            weather['temp'] = m.group('temp')
+            return weather
+        else:
+            return 'error: {}'.format(err)
  
     def update(self):
         weather = self.get_weather()
