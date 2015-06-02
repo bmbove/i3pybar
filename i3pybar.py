@@ -18,9 +18,12 @@ class I3Bar(Thread):
     daemon = True
     _stop = Event()
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.out_q = Queue()
-        self.load_config()
+        if 'settings' in kwargs:
+            self.load_config(kwargs['settings'])
+        else:
+            self.load_config()
         self.load_plugins()
         super(I3Bar, self).__init__()
 
@@ -47,14 +50,14 @@ class I3Bar(Thread):
 
         self.mods = mods
 
-    def load_config(self):
+    def load_config(self, settings_file='settings.conf'):
         config = []
         section_re = re.compile('^\[(?P<plugin>[-\w]+)\]$')
         option_re = re.compile('^(?P<option>[\w-]+)[\s+]?=[\s+]?(?P<value>.*)')
         plugin_name = ''
         try:
             path = os.path.dirname(os.path.realpath(__file__))
-            with open(os.path.join(path, 'settings.conf'), 'r') as fh:
+            with open(os.path.join(path, settings_file), 'r') as fh:
                 lines = [line.strip() for line in fh]
             for line in lines:
                 sec_m = section_re.match(line)
@@ -110,8 +113,10 @@ class I3Bar(Thread):
             sys.stdout.flush()
         exit(0)
 
-
-bar = I3Bar()
+if len(sys.argv) > 1:
+    bar = I3Bar(settings=sys.argv[1])
+else:
+    bar = I3Bar()
 
 def main():
     global bar
