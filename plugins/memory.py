@@ -12,7 +12,6 @@ class MemoryPlugin(PluginBase):
 
     def get_meminfo(self):
 
-        div = float(self.config['divisor'])
         mem_dict = {}
         lines = self.read_file('/proc/meminfo')
         for line in lines.split("\n"):
@@ -27,9 +26,9 @@ class MemoryPlugin(PluginBase):
         used_mem = mem_dict['MemTotal'] - free_mem
 
         mem_info = {
-            'used': '%.2f' % (used_mem/div),
-            'total': '%.2f' % (mem_dict['MemTotal']/div),
-            'free': '%.2f' % (free_mem/div),
+            'used': '%7s' % self.format_size(used_mem * 1024),
+            'total': '%s' % self.format_size(mem_dict['MemTotal'] * 1024),
+            'free': '%7s' % self.format_size(free_mem),
         }
 
         percent_used = int((used_mem/mem_dict['MemTotal']) * 100)

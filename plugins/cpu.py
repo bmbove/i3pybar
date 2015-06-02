@@ -50,7 +50,7 @@ class CPUPlugin(PluginBase):
         percents = self.proc_usage()
         stats['cpu'] = percents[0]
         for i in range(1, len(percents) - 1):
-            stats['cpu%d' % (i-1)] = percents[i]
+            stats['cpu%d' % (i-1)] = '%3d' % percents[i]
 
         locals().update(stats)
         self.set_text(self.config['format'] % locals())

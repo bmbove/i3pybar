@@ -1,3 +1,4 @@
+import math
 import re
 import time
 
@@ -59,6 +60,19 @@ class PluginBase(Thread):
 
     def fix_format(self, f):
         return re.sub(r'{(?P<item>[a-zA-Z0-9_]+)}', r'%(\g<item>)s', f)
+
+    def format_size(self, size):
+        size_name = ("B", "K", "M", "G", "T")
+        try:
+            i = int(math.floor(math.log(size,1024)))
+        except:
+            return '0B'
+        p = math.pow(1024,i)
+        s = round(size/p,2)
+        if (s > 0):
+            return '%.2f%s' % (s,size_name[i])
+        else:
+            return '0B'
 
     def read_file(self, filename, start=0):
         data = ""
