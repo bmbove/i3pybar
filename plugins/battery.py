@@ -18,6 +18,7 @@ class BatteryPlugin(PluginBase):
         self.last_time = time.time() - 21
         self.time_rem = ''
         self.prev_status = 'Unknown'
+        self.start_time = time.time()
         self.get_battery_data()
         return defaults
 
@@ -47,6 +48,9 @@ class BatteryPlugin(PluginBase):
             check_time = False
 
         if batinfo_h['status'] != self.prev_status:
+            check_time = True
+
+        if (time.time() - self.start_time) < 5: 
             check_time = True
 
         self.prev_status = batinfo_h['status']
