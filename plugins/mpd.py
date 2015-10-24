@@ -30,18 +30,19 @@ class MPDPlugin(PluginBase):
     def get_cursong(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.config['host'], self.config['port']))
+        s.recv(100)
 
         status = self.get_mpdstatus(s)
         if status['state'] != 'stop':
 
             s.send(b'currentsong\n')
 
-            status = "" 
-            while "\nOK\n" not in status:
-                status += s.recv(1).decode('ascii')
+            resp = "" 
+            while "\nOK\n" not in resp:
+                resp += s.recv(1).decode('ascii')
             s.close()
 
-            song = status.split('\n')[1].split('/')
+            song = resp.split('\n')[0].split('/')
             song = song[len(song)-1]
             song = song[0:-4]
         else:
