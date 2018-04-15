@@ -8,8 +8,10 @@ class MPDPlugin(PluginBase):
         defaults = {
             'format': '{song}',
             'port': 6600,
-            'host': '0',
+            'host': '127.0.0.1',
         }
+        self.current_song = ''
+        self.song_index = 0 
         return defaults
 
     def get_mpdstatus(self, s):
@@ -45,15 +47,35 @@ class MPDPlugin(PluginBase):
             song = resp.split('\n')[0].split('/')
             song = song[len(song)-1]
             song = song[0:-4]
+            # add a space for clean wrapping
+            song += ' | '
         else:
             song = '(stopped)'
 
         s.close()
 
-        song_info = {
-            'song': '%s' % song 
-        }
+        if song != '(stopped)':
+            # scroll, for some reason
+            if song != self.current_song:
+                self.song_index = 0
+                self.current_song = song
 
+            song_text = song[self.song_index:][0:25]
+            i = 0
+            while(len(song_text) < 25 and i < len(song) - 1):
+                song_text += song[i]
+                i += 1
+
+            self.song_index += 1
+            if self.song_index >= len(song):
+                self.song_index = 0
+            # end scroll logic
+        else:
+            song_text = song
+
+        song_info = {
+            'song': '%s' % song_text
+        }
         return song_info
 
     def update(self):
