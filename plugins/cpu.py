@@ -3,6 +3,10 @@ import time
 
 from .base import PluginBase
 
+import logging
+
+logger = logging.getLogger()
+
 
 class CPUPlugin(PluginBase):
 
@@ -49,7 +53,7 @@ class CPUPlugin(PluginBase):
         stats = {}
         percents = self.proc_usage()
         stats['cpu'] = percents[0]
-        for i in range(1, len(percents) - 1):
+        for i in range(1, len(percents)):
             stats['cpu%d' % (i-1)] = '%3d' % percents[i]
 
         locals().update(stats)

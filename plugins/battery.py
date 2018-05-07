@@ -34,8 +34,8 @@ class BatteryPlugin(PluginBase):
 
         batinfo_h = {
             'status': batinfo['POWER_SUPPLY_STATUS'],
-            'charge': int(batinfo['POWER_SUPPLY_CHARGE_NOW']),
-            'full': int(batinfo['POWER_SUPPLY_CHARGE_FULL']),
+            'charge': int(batinfo['POWER_SUPPLY_ENERGY_NOW']),
+            'full': int(batinfo['POWER_SUPPLY_ENERGY_FULL']),
             'time_rem': '',
             'percent': 0,
         }
