@@ -1,3 +1,4 @@
+import json
 import math
 import re
 import time
@@ -100,6 +101,13 @@ class PluginBase(Thread):
 
     def run(self):
         while True:
-            self.update()
+            try:
+                self.update()
+            except Exception as e:
+                self._display = {
+                    'full_text': "DISPLAY ERROR: {}".format(str(e)),
+                    'color': '#FF2D00'
+                }
+
             self.out_q.put([self.config['slot'], self._display])
             time.sleep(self.config['cache_time'])
