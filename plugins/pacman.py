@@ -8,6 +8,8 @@ from .base import PluginBase
 
 # update every 10 minutes
 UPDATE_TIME = 600
+
+# checkupdates script is in `pacman-contrib` package
  
 class PacmanPlugin(PluginBase):
 
@@ -25,7 +27,7 @@ class PacmanPlugin(PluginBase):
         if now - self.last_update > UPDATE_TIME:
             lines = subprocess.check_output(["checkupdates"])
             lines = lines.decode('ascii').strip()
-            self.update_count = len(lines.split("\n"))
+            self.update_count = max(0, len(lines.split("\n")) - 1)
             self.last_update = now
         return {'updates': self.update_count}
  
