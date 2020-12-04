@@ -58,7 +58,7 @@ class NetworkPlugin(PluginBase):
                 0)            
         )                    
         fcntl.ioctl(sock.fileno(), calls["SIOCGIWESSID"], request)
-        name = essid.tostring().decode('utf-8').rstrip('\0')
+        name = essid.tobytes().decode('utf-8').rstrip('\0')
         if name:
             return name
         return "-"
