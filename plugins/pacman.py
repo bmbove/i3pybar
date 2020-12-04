@@ -25,7 +25,10 @@ class PacmanPlugin(PluginBase):
     def get_update_count(self):
         now = time.time()
         if now - self.last_update > UPDATE_TIME:
-            lines = subprocess.check_output(["checkupdates"])
+            try:
+                lines = subprocess.check_output(["checkupdates"])
+            except:
+                return {'updates': '-'}
             lines = lines.decode('ascii').strip()
             self.update_count = max(0, len(lines.split("\n")) - 1)
             self.last_update = now
