@@ -122,7 +122,7 @@ def main():
     global bar
     bar.start()
 
-    while bar.isAlive():
+    while bar.is_alive():
         time.sleep(3)
 
 if __name__ == '__main__':
