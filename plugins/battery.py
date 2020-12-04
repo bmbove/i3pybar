@@ -39,6 +39,10 @@ class BatteryPlugin(PluginBase):
             'time_rem': '',
             'percent': 0,
         }
+        if batinfo_h['status'] == 'Charging':
+            batinfo_h['charge_indicator'] = "🗲"
+        else:
+            batinfo_h['charge_indicator'] = ""
         batinfo_h['percent'] = int((batinfo_h['charge']/batinfo_h['full']) * 100)
 
         check_time = (batinfo_h['status'] != 'Unknown')
