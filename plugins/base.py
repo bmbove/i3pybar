@@ -97,7 +97,7 @@ class PluginBase(Thread):
         except:
             err = 'connection'
 
-        return err, html.decode('ascii')
+        return err, html.decode()
 
     def run(self):
         while True:

@@ -1,46 +1,55 @@
 """
 @author David Brenner https://github.com/davidbrenner
 """
+
 import re
+import json
 
 from .base import PluginBase
- 
+
+
 class WeatherPlugin(PluginBase):
- 
+
     def configure(self):
         defaults = {
-            'metric': False,
-            'location': '10001',
-            'cache_time': '600',
-            'format': '{conditions} {temp}'
+            "lat": 0,
+            "lon": 0,
+            "cache_time": "600",
+            "format": "{conditions} {temp}",
         }
         return defaults
- 
-    def get_weather(self):
- 
-        base_uri = 'http://rss.accuweather.com/rss/liveweather_rss.asp'
-        url = '%s?metric={metric}&locCode={location}' % base_uri
-        url = url.format(
-            metric=self.config['metric'],
-            location=self.config['location']
-        )
 
+    def get_weather(self):
+
+        points_base_uri = "https://api.weather.gov/points/{lat},{lon}"
+
+        url = points_base_uri.format(
+            lat=self.config["lat"], lon=self.config["lon"]
+        )
         err, html = self.grab_page(url)
         if not err:
-            weather = ''
-            re_str = ">Currently: (?P<conditions>[\s\w]+?): (?P<temp>[\w]+?)<"
-            m = re.search(re_str, html)
-            weather = {}
-            weather['conditions'] = m.group('conditions')
-            weather['temp'] = m.group('temp')
-            return weather
+            j = json.loads(html)
+            try:
+                forecast_uri = j["properties"]["forecastHourly"]
+            except Exception as e:
+                return "error: {}".format(e)
+            err, html = self.grab_page(forecast_uri)
+            if not err:
+                j = json.loads(html)
+                w = j["properties"]["periods"][0]
+                weather = {}
+                weather["conditions"] = w["shortForecast"]
+                weather["temp"] = w["temperature"]
+                return weather
+            else:
+                return "error: {}".format(err)
         else:
-            return 'error: {}'.format(err)
- 
+            return "error: {}".format(err)
+
     def update(self):
         weather = self.get_weather()
         if type(weather) == dict:
             locals().update(weather)
-            self.set_text(self.config['format'] % locals())
+            self.set_text(self.config["format"] % locals())
         else:
             self.set_text(weather)
