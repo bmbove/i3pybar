@@ -75,7 +75,7 @@ class PluginBase(Thread):
 
 
     def format_size(self, size):
-        size_name = ("B", "K", "M", "G", "T")
+        size_name = ("B", "K", "M", "G", "T", "P")
         try:
             i = int(math.floor(math.log(size,1024)))
         except:
