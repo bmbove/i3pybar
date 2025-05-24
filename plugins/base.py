@@ -1,6 +1,7 @@
 import json
 import math
 import re
+import string
 import time
 
 from urllib.request import urlopen, HTTPError, URLError
@@ -21,7 +22,7 @@ class PluginBase(Thread):
 
         self._display = {
             'full_text': ' ',
-            'color': '#%s' % config.get('color', 'FFFFFF')
+            'color': '#{}'.format(config.get('color', 'FFFFFF'))
         }
 
         super(PluginBase, self).__init__()
@@ -60,7 +61,18 @@ class PluginBase(Thread):
         pass
 
     def fix_format(self, f):
+        return f
         return re.sub(r'{(?P<item>[a-zA-Z0-9_]+)}', r'%(\g<item>)s', f)
+
+    def format_from_dict(self, fstr, d):
+        formatter = string.Formatter()
+        keys = []
+        fdict = {}
+        for _, field_name, _, _ in formatter.parse(fstr):
+            if field_name is not None:
+                fdict[field_name] = d.get(field_name, None)
+        return fstr.format(**fdict)
+
 
     def format_size(self, size):
         size_name = ("B", "K", "M", "G", "T")
@@ -71,7 +83,7 @@ class PluginBase(Thread):
         p = math.pow(1024,i)
         s = round(size/p,2)
         if (s > 0):
-            return '%.2f%s' % (s,size_name[i])
+            return '{:0.2f}{:s}'.format(s,size_name[i])
         else:
             return '0B'
 
@@ -108,6 +120,7 @@ class PluginBase(Thread):
                     'full_text': "DISPLAY ERROR: {}".format(str(e)),
                     'color': '#FF2D00'
                 }
+                raise
 
             self.out_q.put([self.config['slot'], self._display])
             time.sleep(self.config['cache_time'])

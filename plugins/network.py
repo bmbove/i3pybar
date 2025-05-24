@@ -132,11 +132,18 @@ class NetworkPlugin(PluginBase):
             self.info['essid'] = self.get_essid(self.iface)
 
         usage = self.data_info()
-        self.info['total_up'] = '%7s' % self.format_size(usage['tx'])
-        self.info['total_down'] = '%7s' % self.format_size(usage['rx'])
-        self.info['up_speed'] = "%7s/s" % self.format_size(usage['tx_speed'])
-        self.info['down_speed'] = "%7s/s" % self.format_size(usage['rx_speed'])
+        self.info['total_up'] = '{:7s}'.format(self.format_size(usage['tx']))
+        self.info['total_down'] = '{:7s}'.format(self.format_size(usage['rx']))
+        self.info['up_speed'] = '{:7s}/s'.format(
+            self.format_size(usage['tx_speed'])
+        )
+        self.info['down_speed'] = '{:7s}/s'.format(
+            self.format_size(usage['rx_speed'])
+        )
 
         self.info['ip'] = self.get_ip(self.iface)
-        locals().update(self.info)
-        self.set_text(self.config['format'] % locals())
+
+        fvars = self.info
+        self.set_text(
+            self.format_from_dict(self.config['format'], fvars)
+        )

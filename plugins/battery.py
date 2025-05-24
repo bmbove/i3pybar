@@ -69,7 +69,7 @@ class BatteryPlugin(PluginBase):
                 self.last_time = time.time()
                 m, s = divmod(time_left, 60)
                 h, m = divmod(m, 60)
-                batinfo_h['time_rem'] = "%dh %02dm" % (abs(h), m)
+                batinfo_h['time_rem'] = "{:d}h {:02d}m".format(abs(h), m)
                 self.time_rem = batinfo_h['time_rem']
             except:
                 pass
@@ -82,8 +82,10 @@ class BatteryPlugin(PluginBase):
     def update(self):
         try:
             data = self.get_battery_data()
-            status = data['status']
-            locals().update(data)
-            self.set_text(self.config['format'] % locals())
+            fvars = data
+            fvars['status'] = data['status']
+            self.set_text(
+                self.format_from_dict(self.config['format'], fvars)
+            )
         except Exception as e:
             self.set_text(str(e))

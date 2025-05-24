@@ -6,7 +6,7 @@ class MemoryPlugin(PluginBase):
     def configure(self):
         defaults = {
             'divisor': str(1024**2),
-            'format': '{used}/{total} {percent}%%'
+            'format': '{used}/{total} {percent}%'
         }
         return defaults
 
@@ -26,9 +26,11 @@ class MemoryPlugin(PluginBase):
         used_mem = mem_dict['MemTotal'] - free_mem
 
         mem_info = {
-            'used': '%7s' % self.format_size(used_mem * 1024),
-            'total': '%s' % self.format_size(mem_dict['MemTotal'] * 1024),
-            'free': '%7s' % self.format_size(free_mem),
+            'used': '{:7s}'.format(self.format_size(used_mem * 1024)),
+            'total': '{:s}'.format(
+                self.format_size(mem_dict['MemTotal'] * 1024)
+            ),
+            'free': '{:7s}'.format(self.format_size(free_mem)),
         }
 
         percent_used = int((used_mem/mem_dict['MemTotal']) * 100)
@@ -36,5 +38,7 @@ class MemoryPlugin(PluginBase):
         return mem_info
 
     def update(self):
-        locals().update(self.get_meminfo())
-        self.set_text(self.config['format'] % locals())
+        fvars = self.get_meminfo()
+        self.set_text(
+            self.format_from_dict(self.config['format'], fvars)
+        )

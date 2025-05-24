@@ -49,7 +49,8 @@ class WeatherPlugin(PluginBase):
     def update(self):
         weather = self.get_weather()
         if type(weather) == dict:
-            locals().update(weather)
-            self.set_text(self.config["format"] % locals())
+            self.set_text(
+                self.format_from_dict(self.config["format"], weather)
+            )
         else:
             self.set_text(weather)

@@ -12,7 +12,7 @@ class CPUPlugin(PluginBase):
 
     def configure(self):
         defaults = {
-            'format': '{cpu}%%',
+            'format': '{cpu}%',
         }
         self.source = '/proc/stat'
         self.last_usage = [0] * (self.num_cpus() + 1)
@@ -50,11 +50,13 @@ class CPUPlugin(PluginBase):
         return percents 
 
     def update(self):
-        stats = {}
+        fvars = {}
+        # stats = {}
         percents = self.proc_usage()
-        stats['cpu'] = percents[0]
+        fvars['cpu'] = percents[0]
         for i in range(1, len(percents)):
-            stats['cpu%d' % (i-1)] = '%3d' % percents[i]
+            fvars['cpu{}'.format(i-1)] = '{:3d}'.format(percents[i])
 
-        locals().update(stats)
-        self.set_text(self.config['format'] % locals())
+        self.set_text(
+            self.format_from_dict(self.config['format'], fvars)
+        )
